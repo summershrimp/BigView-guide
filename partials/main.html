@@ -1,0 +1,184 @@
+<div id="wrapper" class="wrapper">
+<section id="s1">
+	<div class="container">
+		<h3 id="data">第一步：输入您的数据
+			<span class="list-type pull-right">
+				<i class="type fa fa-align-left breath-left"
+				data-toggle="tooltip"
+				data-title="文本"
+				ng-click="dataView='text'" ng-class="{selected:dataView!='table'}"></i>
+				<i class="type fa fa-table breath-left"
+				data-toggle="tooltip"
+				data-title="表格"
+				ng-click="dataView='table'" ng-class="{selected:dataView=='table'}"></i>
+			</span>
+			<button type="button"
+				class="choose btn btn-default"
+				ng-model="sample"
+				placeholder="或者选择我们提供的样例"
+				ng-options="s as s.title for s in samples" bs-select>
+			</button>
+			<span class="clearfix"></span>
+		</h3>
+		<div data-ng-show="dataView != 'table'">
+			<textarea ui-codemirror="{ 
+					lineNumbers : true,
+					lineWrapping : true,
+					placeholder : '粘贴文本或拖入一个文件。还没有想要展示的数据？试一下我们为您提供的数据吧！'
+				}"
+				ng-model="text">
+			</textarea>
+		</div>
+		<div raw-table class="data-table" data-ng-show="dataView == 'table'"></div>
+		<div>
+			<div data-ng-show="!loading && !error && data.length" class="alert alert-success"><i class="fa fa-thumbs-up breath-right"></i>成功录入 <strong>{{data.length}}</strong> 条数据！</div>
+			<div data-ng-show="error" class="alert alert-warning"><i class="fa fa-thumbs-down breath-right"></i><strong>出问题了。</strong>错误在第 {{error+1}} 行，可能是少了几个分隔符。如果您的某段文本有逗号，记得把这段文本放在双引号里。</div>
+			<div data-ng-show="loading" class="alert"><i class="fa breath-right fa-refresh fa-spin"></i>正在加载，请稍候 ^_^</div>
+		</div>
+	</div>
+</section>
+<section id="s2" data-ng-show="!error && data.length">
+	<div class="container">
+		<div>
+			<h3 id="layout">第二步：选择图表类型</h3>
+			<div class="row">
+				<div class="col-lg-3 col-md-3">
+					<div class="chart-description">
+						<h4>{{chart.title()}}</h4>
+						<p class="light" ng-bind-html="chart.description()"></p>
+						<p class="light" data-ng-show="!chart.description()">还没有描述哦</p>
+					</div>
+				</div>
+				<div class="col-lg-9 col-md-9">
+					<div class="row" group every="3" watch="charts">
+						<div class="col-lg-4 col-md-4" ng-repeat="c in charts track by $index">
+							<div ng-class="{selected: c == chart}" class="layout"  ng-click="selectChart(c)">
+								<div class="layout-thumb" ng-style="{'background-image':'url(' + c.thumbnail() + ')'}">
+								</div>
+								<p class="layout-inner" >
+									<span class="layout-title">{{c.title()}}</span>
+									<i data-ng-show="c==chart" class="fa fa-check pull-right"></i>
+								</p>
+							</div>
+						</div>
+						<!-- <div class="col-lg-4 col-md-4">
+							<a href="https://github.com/densitydesign/raw/wiki/Adding-New-Charts">
+								<div class="layout yours">
+									<div class="layout-thumb">
+										<i class="fa fa-plus-square"></i>
+									</div>
+									<p class="layout-inner" >
+										<span class="layout-title">添加您自己的图表！</span>
+									</p>
+								</div>
+							</a>
+						</div> -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<section id="s3" data-ng-show="!error && data.length">
+	<div class="container">
+		<div id="mapping" class="row-fluid">
+			<div>
+				<h3>第三步：设置图表内容
+					<a data-toggle="tooltip" data-title="Clear all" ng-click="model.clear()" class="pull-right light">
+						<i class="fa fa-trash-o"></i>
+					</a>
+					<span class="clearfix"></span>
+				</h3>
+			</div>
+			<div class="row">
+				<div class="col-lg-3 col-md-3">
+					<div draggable>
+						<ul class="list-unstyled dimensions-list">
+							<li class="dimension" data-dimension="{{dimension}}" ng-repeat="dimension in metadata track by $index">
+								<span class="dimension-key">{{ dimension.key }}</span>
+								<span class="dimension-type">{{((dimension.type=="String")?"文本":((dimension.type=="Number")?"数字":"日期"))}}</span>
+								<span class="dimension-icon pull-right"><i class="fa fa-bars"></i></span>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-lg-9 col-md-9">
+					<div class="sticky">
+						<div class="row" group every="3" watch="model">
+							<div class="col-lg-4 col-md-4 dimensions-wrapper"
+								ng-repeat="dimension in model.dimensions().values() track by $index" ng-init="open=false">
+								<div class="dimensions-model">
+									<div class="dimension-multiple">
+										<i class="fa fa-tag" data-toggle="tooltip" data-title="Single dimension" data-ng-show="!dimension.multiple()"></i>
+										<i class="fa fa-tags" data-toggle="tooltip" data-title="Multiple dimension" data-ng-show="dimension.multiple()"></i>
+									</div>
+									<a class="dimension-info" data-toggle="tooltip" data-title="Show description" ng-click="open = !open" ng-show="dimension.description()">
+									<!--<i class="fa fa-info dimension-info-toggle"></i>-->
+									</a>
+									<p class="dimension-title">{{dimension.title()}}</p>
+									<ul sortable title="dimension.title()" value="dimension.value" multiple="dimension.multiple()" types="dimension.types()" class="dimensions-container list-unstyled">
+									</ul>
+									<div class="dimension-description" ng-class="{open: open}">{{dimension.description()}}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="container">
+		<h3 style="margin-top:20px">第四步：设置图表样式</h3>
+		<div class="row">
+			<div class="col-lg-3">
+				<ul class="list-unstyled">
+					<li ng-repeat="option in chart.options() track by $index" chart-option>
+						<span class="option-title">{{option.title()}}
+							<a data-ng-show="option.fitToWidth()" data-toggle="tooltip" data-title="自动匹配" class="option-fit pull-right"><i class="fa fa-expand"></i></a>
+						</span>
+						<span ng-switch="" on="option.type()">
+							<input type="number" min="0" class="form-control" ng-model="option.value" ng-switch-when="number"></input>
+							<span ng-switch-when="checkbox">
+								<label style="float:right"><input type="checkbox" ng-model="option.value"/></label>
+							</span>
+							<div colors="option.value" ng-switch-when="color"></div>
+							<button type="button" class="btn btn-default" ng-model="option.value" ng-change="$apply()" ng-options="opt for opt in option.values()" bs-select ng-switch-when="list">
+								Action <span class="caret"></span>
+							</button>
+							<input type="text" min="0" class="form-control" ng-model="option.value" ng-switch-default="ng-switch-default"></input>
+						</span>
+					</li>
+				</ul>
+			</div>
+			<div class="col-lg-9">
+				<div class="chart-resize">
+					<div ng-show="!isEmpty()" id="chart" chart></div>
+					<p class="light" ng-show="isEmpty()">
+						<i class="fa fa-hand-o-up breath-right"></i>
+						将上方的数据列拖入划分窗口就可以看到可视化的数据啦~
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<section id="s4" ng-show="!isEmpty()" style="padding-bottom:50px">
+	<div class="container">
+		<div>
+			<div id="export" class="row">
+				<div class="col-lg-3">
+					<h3><i class="fa fa-arrow-circle-o-down breath-right"></i>下载</h3>
+					<downloader></downloader>
+				</div>
+				<div class="col-lg-9">
+					<h3 id="data"><i class="fa fa-code breath-right"></i>嵌入代码</h3>
+					<coder></coder>
+					<p class="light">将以上代码复制到您的HTML文件中即可嵌入可视化图表。
+						<a class="pull-right" id="copy-button" copy-button data-clipboard-target="source" data-container="body"><i class="fa fa-clipboard"></i></a>
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+</div>
